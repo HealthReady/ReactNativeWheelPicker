@@ -1,241 +1,133 @@
 import React from 'react';
 import {
-  View,
-  StyleSheet,
+    View,
+    StyleSheet,
 } from 'react-native';
 import WheelPicker from './WheelPicker';
-import moment from 'moment';
 
 class DatePicker extends React.Component {
-  constructor(props) {
-    super(props);
-    this.selectedDate = this.props.initDate ? new Date(this.props.initDate) : new Date();
-    const time12format = hourTo12Format(this.selectedDate.getHours());
-    const time24format = this.selectedDate.getHours();
-
-    const millisecondsPerDay = 1000 * 60 * 60 * 24;
-    const millisBetween = this.selectedDate.getTime() - new Date().getTime();
-
-    let millisBetweenStartDate,
-      daysStartDate;
-    if (this.props.startDate) {
-      millisBetweenStartDate = new Date(this.props.startDate).getTime() - new Date().getTime();
-      daysStartDate = millisBetweenStartDate / millisecondsPerDay;
+    constructor(props) {
+        super(props);
+        this.selectedDate = this.props.initDate ? new Date(this.props.initDate) : new Date();
+        this.initDateInex = this.selectedDate.getDate() - 1;
+        this.initMonthInex = this.selectedDate.getMonth();
+        this.initYearInex = PickerYearArray(this.props.initDate, this.props.minimumDate, this.props.maximumDate).indexOf(this.selectedDate.getFullYear());
     }
 
-    const days = millisBetween / millisecondsPerDay;
-    this.daysAfterSelectedDate = Math.round(daysStartDate);
-    this.initDayInex = this.props.startDate ? Math.round(days) - Math.round(daysStartDate) : Math.round(days);
-    this.initHourInex = this.props.format24 ? time24format : time12format[0] - 1;
-    this.initMinuteInex = Math.round(this.selectedDate.getMinutes() / 5);
-    this.initAmInex = time12format[1] === 'AM' ? 0 : 1;
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <WheelPicker
-          style={styles.dateWheelPicker}
-          isAtmospheric
-          isCurved
-          visibleItemCount={8}
-          data={this.props.days ? this.props.days : PickerDateArray(this.props.startDate, this.props.daysCount)}
-          selectedItemTextColor={'black'}
-          onItemSelected={data => this.onDaySelected(data)}
-          selectedItemPosition={this.initDayInex}
-        />
-        <WheelPicker
-          style={styles.wheelPicker}
-          isAtmospheric
-          isCyclic
-          isCurved
-          visibleItemCount={8}
-          data={this.props.hours ? this.props.hours : getHoursArray()}
-          selectedItemTextColor={'black'}
-          onItemSelected={data => this.onHourSelected(data)}
-          selectedItemPosition={this.initHourInex}
-        />
-        <WheelPicker
-          style={styles.wheelPicker}
-          isAtmospheric
-          isCyclic
-          isCurved
-          visibleItemCount={8}
-          data={this.props.minutes ? this.props.minutes : getFiveMinutesArray()}
-          selectedItemTextColor={'black'}
-          onItemSelected={data => this.onMinuteSelected(data)}
-          selectedItemPosition={this.initMinuteInex}
-        />
-        {this.renderAm()}
-      </View>
-    );
-  }
-
-  renderAm() {
-    if (!this.props.format24) {
-      return (
-        <WheelPicker
-          style={styles.wheelPicker}
-          isAtmospheric
-          isCurved
-          visibleItemCount={8}
-          data={getAmArray()}
-          selectedItemTextColor={'black'}
-          onItemSelected={data => this.onAmSelected(data)}
-          selectedItemPosition={this.initAmInex}
-        />
-      );
+    render() {
+        return (
+            <View style={styles.container}>
+              <WheelPicker
+                  style={[styles.dateWheelPicker, {width: 30}, this.props.dateWheelPickerDateStyle]}
+                  isAtmospheric
+                  isCurved
+                  visibleItemCount={8}
+                  data={this.props.dates ? this.props.dates : PickerDateArray(this.selectedDate)}
+                  selectedItemTextColor={'black'}
+                  onItemSelected={data => this.onDateSelected(data)}
+                  selectedItemPosition={this.initDateInex}
+              />
+              <WheelPicker
+                  style={[styles.dateWheelPicker, {width: 120}, this.props.dateWheelPickerMonthStyle]}
+                  isAtmospheric
+                  isCurved
+                  visibleItemCount={8}
+                  data={this.props.months ? this.props.months : PickerMonthArray()}
+                  selectedItemTextColor={'black'}
+                  onItemSelected={data => this.onMonthSelected(data)}
+                  selectedItemPosition={this.initMonthInex}
+              />
+              <WheelPicker
+                  style={[styles.dateWheelPicker, {width: 80}, this.props.dateWheelPickerYearStyle]}
+                  isAtmospheric
+                  isCurved
+                  visibleItemCount={8}
+                  data={this.props.years ? this.props.years : PickerYearArray(this.props.initDate, this.props.minimumDate, this.props.maximumDate)}
+                  selectedItemTextColor={'black'}
+                  onItemSelected={data => this.onYearSelected(data)}
+                  selectedItemPosition={this.initYearInex}
+              />
+            </View>
+        );
     }
-  }
 
-  onDaySelected(event) {
-    const hours = this.selectedDate.getHours();
-    const minutes = this.selectedDate.getMinutes();
-    if (event.data === 'Today') {
-      this.selectedDate = new Date();
-    } else {
-      this.selectedDate = increaseDateByDays(new Date(), this.props.startDate ? this.daysAfterSelectedDate + event.position : event.position);
+    onDateSelected(event) {
+        this.selectedDate.setDate(event.data);
+        this.onDateChanged();
     }
-    this.selectedDate.setHours(hours);
-    this.selectedDate.setMinutes(minutes);
-    this.onDateSelected();
-  }
 
-  onHourSelected(event) {
-    if (this.props.format24) {
-      this.selectedDate.setHours(event.data);
-    } else {
-      const time12format = hourTo12Format(this.selectedDate.getHours());
-      const newTime12Format = `${event.data} ${time12format[1]}`;
-      const selectedHour24format = hourTo24Format(newTime12Format);
-      this.selectedDate.setHours(selectedHour24format);
+    onMonthSelected(event) {
+        this.selectedDate.setMonth(event.position);
+        this.onDateChanged();
     }
-    this.onDateSelected();
-  }
 
-  onMinuteSelected(event) {
-    this.selectedDate.setMinutes(event.data);
-    this.onDateSelected();
-  }
-
-  onAmSelected(event) {
-    const time12format = hourTo12Format(this.selectedDate.getHours());
-    const newTime12Format = `${time12format[0]} ${event.data}`;
-    const selectedHour24format = hourTo24Format(newTime12Format);
-    this.selectedDate.setHours(selectedHour24format);
-    this.onDateSelected();
-  }
-
-  onDateSelected() {
-    if (this.props.onDateSelected) {
-      this.props.onDateSelected(this.selectedDate);
+    onYearSelected(event) {
+        this.selectedDate.setYear(event.data);
+        this.onDateChanged();
     }
-  }
+
+    onDateChanged() {
+        if (this.props.onDateSelected) {
+            this.props.onDateSelected(this.selectedDate);
+        }
+    }
 
 }
 
 DatePicker.propTypes = {
-  initDate: React.PropTypes.string,
-  onDateSelected: React.PropTypes.func,
-  startDate: React.PropTypes.string,
-  daysCount: React.PropTypes.number,
-  days: React.PropTypes.array,
-  hours: React.PropTypes.array,
-  minutes: React.PropTypes.array,
-  format24: React.PropTypes.bool,
+    dateWheelPickerDateStyle: React.PropTypes.object,
+    dateWheelPickerMonthStyle: React.PropTypes.object,
+    dateWheelPickerYearStyle: React.PropTypes.object,
+    initDate: React.PropTypes.string,
+    onDateSelected: React.PropTypes.func,
+    minimumDate: React.PropTypes.string,
+    maximumDate: React.PropTypes.string,
 };
 
 let styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  wheelPicker: {
-    height: 150,
-    width: null,
-    flex: 1,
-  },
-  dateWheelPicker: {
-    height: 200,
-    width: null,
-    flex: 3,
-  },
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        flexDirection: 'row',
+    },
+    wheelPicker: {
+        height: 150,
+        width: null,
+        flex: 1,
+    },
+    dateWheelPicker: {
+        height: 200,
+        width: null,
+        flex: 3,
+    },
 });
 
-// it takes in format '12 AM' and return 24 format
-function hourTo24Format(hour) {
-  return parseInt(moment(hour, ['h A']).format('H'), 10);
-}
-
-// it takes in format 23 and return [11,'PM'] format
-function hourTo12Format(hour) {
-  const currDate = new Date();
-  currDate.setHours(hour);
-  return dateTo12Hour(currDate.toISOString());
-}
-
-const dateTo12Hour = (dateString) => {
-  const localDate = new Date(dateString);
-  let hour = localDate.getHours();
-  if (hour === 12) {
-    return [('12'), ('PM')];
-  } if (hour === 0) {
-    return [('12'), ('AM')];
-  }
-  const afterMidday = hour % 12 === hour;
-  hour = afterMidday ? hour : hour % 12;
-  const amPm = afterMidday ? 'AM' : 'PM';
-  return [(hour.toString()), (amPm)];
+const daysInMonth = (month, year) => {
+    return new Date(year, month, 0).getDate();
 };
 
-function increaseDateByDays(date, numOfDays) {
-  const nextDate = new Date(date.valueOf());
-  nextDate.setDate(nextDate.getDate() + numOfDays);
-  return nextDate;
-}
-
-const PickerDateArray = (startDate, daysCount) => {
-  startDate = startDate ? new Date(startDate) : new Date();
-  daysCount = daysCount ? daysCount : 365;
-  const arr = [];
-  for (let i = 0; i < daysCount; i++) {
-    if (i === 0 && startDate.getDate() === new Date().getDate()) {
-      arr.push('Today');
-    } else {
-      arr.push(formatDatePicker(new Date(new Date().setDate(startDate.getDate() + i))));
+const PickerDateArray = (selectedDate) => {
+    const days = daysInMonth(selectedDate.getMonth() + 1, selectedDate.getYear());
+    const arr = [];
+    for (let i = 1; i <= days; i++) {
+        arr.push(i);
     }
-  }
-  return arr;
+    return arr;
 };
 
-function formatDatePicker(date) {
-  const strDate = moment(date).format('ddd MMM D');
-  return strDate;
-}
+const PickerMonthArray = () => {
+    return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+};
 
-function getHoursArray() {
-  const arr = [];
-  for (let i = 1; i < 13; i++) {
-    arr.push(i);
-  }
-  return arr;
-}
+const PickerYearArray = (startDate, minimumDate, maximumDate) => {
+    var startDate = new Date(startDate);
+    var years = [];
+    const minDate = minimumDate ? new Date(minimumDate) : startDate;
+    const maxDate = maximumDate ? new Date(maximumDate) : startDate;
+    for (var i = minDate.getFullYear(); i <= maxDate.getFullYear(); i++){
+        years.push(i);
+    }
+    return years;
+};
 
-function getFiveMinutesArray() {
-  const arr = [];
-  arr.push('00');
-  arr.push('05');
-  for (let i = 10; i < 60; i += 5) {
-    arr.push(`${i}`);
-  }
-  return arr;
-}
-
-function getAmArray() {
-  const arr = [];
-  arr.push('AM');
-  arr.push('PM');
-  return arr;
-}
 module.exports = DatePicker;
