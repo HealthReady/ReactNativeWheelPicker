@@ -17,36 +17,36 @@ class DatePicker extends React.Component {
     render() {
         return (
             <View style={styles.container}>
-              <WheelPicker
-                  style={[styles.dateWheelPicker, {width: 30}, this.props.dateWheelPickerDateStyle]}
-                  isAtmospheric
-                  isCurved
-                  visibleItemCount={8}
-                  data={this.props.dates ? this.props.dates : PickerDateArray(this.selectedDate)}
-                  selectedItemTextColor={'black'}
-                  onItemSelected={data => this.onDateSelected(data)}
-                  selectedItemPosition={this.initDateInex}
-              />
-              <WheelPicker
-                  style={[styles.dateWheelPicker, {width: 120}, this.props.dateWheelPickerMonthStyle]}
-                  isAtmospheric
-                  isCurved
-                  visibleItemCount={8}
-                  data={this.props.months ? this.props.months : PickerMonthArray()}
-                  selectedItemTextColor={'black'}
-                  onItemSelected={data => this.onMonthSelected(data)}
-                  selectedItemPosition={this.initMonthInex}
-              />
-              <WheelPicker
-                  style={[styles.dateWheelPicker, {width: 80}, this.props.dateWheelPickerYearStyle]}
-                  isAtmospheric
-                  isCurved
-                  visibleItemCount={8}
-                  data={this.props.years ? this.props.years : PickerYearArray(this.props.initDate, this.props.minimumDate, this.props.maximumDate)}
-                  selectedItemTextColor={'black'}
-                  onItemSelected={data => this.onYearSelected(data)}
-                  selectedItemPosition={this.initYearInex}
-              />
+                <WheelPicker
+                    style={[styles.dateWheelPicker, {width: 30}, this.props.dateWheelPickerDateStyle]}
+                    isAtmospheric
+                    isCurved
+                    visibleItemCount={8}
+                    data={this.props.dates ? this.props.dates : PickerDateArray(this.selectedDate)}
+                    selectedItemTextColor={'black'}
+                    onItemSelected={data => this.onDateSelected(data)}
+                    selectedItemPosition={this.initDateInex}
+                />
+                <WheelPicker
+                    style={[styles.dateWheelPicker, {width: 120}, this.props.dateWheelPickerMonthStyle]}
+                    isAtmospheric
+                    isCurved
+                    visibleItemCount={8}
+                    data={this.props.months ? this.props.months : PickerMonthArray()}
+                    selectedItemTextColor={'black'}
+                    onItemSelected={data => this.onMonthSelected(data)}
+                    selectedItemPosition={this.initMonthInex}
+                />
+                <WheelPicker
+                    style={[styles.dateWheelPicker, {width: 80}, this.props.dateWheelPickerYearStyle]}
+                    isAtmospheric
+                    isCurved
+                    visibleItemCount={8}
+                    data={this.props.years ? this.props.years : PickerYearArray(this.props.initDate, this.props.minimumDate, this.props.maximumDate)}
+                    selectedItemTextColor={'black'}
+                    onItemSelected={data => this.onYearSelected(data)}
+                    selectedItemPosition={this.initYearInex}
+                />
             </View>
         );
     }
@@ -119,11 +119,11 @@ const PickerMonthArray = () => {
     return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 };
 
-const PickerYearArray = (startDate, minimumDate, maximumDate) => {
-    var startDate = new Date(startDate);
+const PickerYearArray = (selectedDate, minimumDate, maximumDate) => {
+    selectedDate = new Date(selectedDate);
     var years = [];
-    const minDate = minimumDate ? new Date(minimumDate) : startDate;
-    const maxDate = maximumDate ? new Date(maximumDate) : startDate;
+    const minDate = minimumDate ? new Date(minimumDate) : selectedDate;
+    const maxDate = maximumDate ? new Date(maximumDate) : selectedDate;
     for (var i = minDate.getFullYear(); i <= maxDate.getFullYear(); i++){
         years.push(i);
     }
