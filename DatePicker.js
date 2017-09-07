@@ -98,7 +98,8 @@ let styles = StyleSheet.create({
     dateWheelPicker: {
         height: 200,
         width: null,
-        flex: 3,
+        // Commented out for RN >0.47
+        //flex: 3,
     },
 });
 
